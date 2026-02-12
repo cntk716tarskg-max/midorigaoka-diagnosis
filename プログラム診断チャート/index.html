@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>緑ヶ丘女子 なりたい自分診断</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap');
+        body { font-family: 'Zen Maru Gothic', sans-serif; }
+        /* アニメーション用 */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+    <div id="root"></div>
+
+    <script type="module">
+        import React, { useState, useEffect } from 'https://esm.sh/react@18.2.0';
+        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+        import { 
+            Sparkles, Heart, School, BookOpen, Trophy, Briefcase, Smile, 
+            ArrowRight, RefreshCw, Star, Music, Sun, Cloud, PenTool, 
+            Globe, Stethoscope, Baby, Rocket, Monitor, Instagram, 
+            Share2, X, Copy, ExternalLink, Image as ImageIcon, Download 
+        } from 'https://esm.sh/lucide-react@0.263.1';
+
+        const MidorigaokaDiagnosis = () => {
+            const [step, setStep] = useState('start');
+            const [history, setHistory] = useState([]);
+            const [programResult, setProgramResult] = useState(null);
+            const [anxietyLevel, setAnxietyLevel] = useState('low');
+            const [showShareModal, setShowShareModal] = useState(false);
+            const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+            const [generatedImage, setGeneratedImage] = useState(null);
+            const [copySuccess, setCopySuccess] = useState(false);
+
+            useEffect(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, [step]);
+
+            const programs = {
+                academics: {
+                    id: 'academics',
+                    title: 'アカデミクス',
+                    subtitle: '〜目指せ！知識の探究者〜',
+                    color: 'bg-blue-50 border-blue-200',
+                    headerBg: 'bg-gradient-to-b from-blue-100 to-white',
+                    textGradient: 'from-blue-500 to-indigo-600',
+                    accentColor: 'text-blue-600',
+                    hexColor: '#3B82F6',
+                    bgHex: '#EFF6FF',
+                    emoji: '📚',
+                    icon: React.createElement("img", { src: "resulticon02.png", className: "w-22 h-22 object-contain drop-shadow-md", alt: "Icon" }),
+                    midorisuMsg: "高い目標に向かってコツコツ頑張れるキミは本当にかっこいいよ！✨ 長期休暇のセミナーや個別最適化学習で力を蓄えて、キミにしか到達できない未来を掴み取ってね！",
+                    fact: "塾に通わずとも、校内完備の学習室や長期休暇中のセミナー、日々の自学自習管理などで着実に力を伸ばし、上位大学への一般選抜合格を目指せます。",
+                },
+                nursing: {
+                    id: 'nursing',
+                    title: '看護医療',
+                    subtitle: '〜未来の白衣の天使〜',
+                    color: 'bg-pink-50 border-pink-200',
+                    headerBg: 'bg-gradient-to-b from-pink-100 to-white',
+                    textGradient: 'from-pink-500 to-rose-600',
+                    accentColor: 'text-pink-600',
+                    hexColor: '#EC4899',
+                    bgHex: '#FDF2F8',
+                    emoji: '💉',
+                    icon: React.createElement("img", { src: "resulticon03.png", className: "w-22 h-22 object-contain drop-shadow-md", alt: "Icon" }),
+                    midorisuMsg: "誰かのために冷静に動けるキミは、みんなの頼れるヒーローだね💖 看護体験やセミナーで、その優しい心を『確かな技術』に変えていこう！",
+                    fact: "2026年度からの系属校化により、神奈川歯科大学への特別な入試制度が設置されます。また、隣接する聖ヨゼフ病院での3日間実習や現役医師による講義など、現場を肌で感じる機会が豊富です。",
+                },
+                child_education: {
+                    id: 'child_education',
+                    title: 'こども教育',
+                    subtitle: '〜笑顔をつくる先生〜',
+                    color: 'bg-yellow-50 border-yellow-200',
+                    headerBg: 'bg-gradient-to-b from-yellow-100 to-white',
+                    textGradient: 'from-yellow-500 to-orange-500',
+                    accentColor: 'text-yellow-600',
+                    hexColor: '#EAB308',
+                    bgHex: '#FEFCE8',
+                    emoji: '🌻',
+                    icon: React.createElement("img", { src: "resulticon04.png", className: "w-22 h-22 object-contain drop-shadow-md", alt: "Icon" }),
+                    midorisuMsg: "周りを笑顔にする天才だね！🌻 こども教育基礎講座や実習で、キミの『教える優しさ』はもっと輝くはずだよ。素敵な先生になる未来が見えるよ！",
+                    fact: "週1回の個人ピアノレッスンや、横須賀幼稚園での1年にわたる定期実習、保育技術を学べる授業など、実践的なスキルを磨く環境が整っています。教育系の上級学校へ進学する高い実績があります。",
+                },
+                future_exploration: {
+                    id: 'future_exploration',
+                    title: '未来探究',
+                    subtitle: '〜社会を変える冒険者〜',
+                    color: 'bg-purple-50 border-purple-200',
+                    headerBg: 'bg-gradient-to-b from-purple-100 to-white',
+                    textGradient: 'from-purple-500 to-violet-600',
+                    accentColor: 'text-purple-600',
+                    hexColor: '#A855F7',
+                    bgHex: '#FAF5FF',
+                    emoji: '🚀',
+                    icon: React.createElement("img", { src: "resulticon05.png", className: "w-22 h-22 object-contain drop-shadow-md", alt: "Icon" }),
+                    midorisuMsg: "好奇心旺盛なキミの視点は、これからの世界を面白くする鍵だよ🗝️ 企業見学や探究活動を通じて、教科書には載っていないワクワクをたくさん見つけてね！",
+                    fact: "将来の夢を追求したい生徒、またはこれから見つけたい生徒どちらも大歓迎です。企業見学や探究発表、外部と連携した本格的な活動を通じて、総合型選抜に不可欠な「課題解決力」を養います。",
+                },
+                career_build: {
+                    id: 'career_build',
+                    title: 'キャリアビルド',
+                    subtitle: '〜スキルの達人〜',
+                    color: 'bg-green-50 border-green-200',
+                    headerBg: 'bg-gradient-to-b from-green-100 to-white',
+                    textGradient: 'from-green-500 to-emerald-600',
+                    accentColor: 'text-green-600',
+                    hexColor: '#22C55E',
+                    bgHex: '#F0FDF4',
+                    emoji: '💼',
+                    icon: React.createElement("img", { src: "resulticon06.png", className: "w-22 h-22 object-contain drop-shadow-md", alt: "Icon" }),
+                    midorisuMsg: "自分の手で道を切り拓こうとする姿勢、すごく素敵だよ！🌿 資格取得や専門学校の先生との出会いで、キミだけの『一生モノの武器』を手に入れよう！",
+                    fact: "専門学校の先生による出張授業や、資格取得を強力にサポートします。高校卒業後の就職や専門学校への進学をイメージした、即戦力のスキルを身につけるプログラムです。基礎プログラムはないので、他プログラムを様々経験してみるのもおすすめです。",
+                },
+                sports: {
+                    id: 'sports',
+                    title: 'スポーツ',
+                    subtitle: '〜頂点を目指すアスリート〜',
+                    color: 'bg-orange-50 border-orange-200',
+                    headerBg: 'bg-gradient-to-b from-orange-100 to-white',
+                    textGradient: 'from-orange-500 to-red-500',
+                    accentColor: 'text-orange-600',
+                    hexColor: '#F97316',
+                    bgHex: '#FFF7ED',
+                    emoji: '🏆',
+                   icon: React.createElement("img", { src: "resulticon07.png", className: "w-22 h-22 object-contain drop-shadow-md", alt: "Icon" }),
+                    midorisuMsg: "ストイックに夢を追いかけるキミの情熱は、周りのみんなにも勇気をくれるよ！🔥 大好きな競技に没頭して、その努力を進路という最高の結果に繋げよう！",
+                    fact: "強化指定部（新体操・バレーボール）に所属し、スポーツの成果での大学進学を目指します。3年次には午後の時間をすべて部活動に集中させることができ、学業と競技の両立を徹底サポートします。",
+                },
+            };
+
+            const questions = {
+                q1: {
+                    text: "どんな高校生活を送りたい？",
+                    options: [
+                        { label: "志望校合格！勉強に集中して高い目標を目指す 📚", value: "S" },
+                        { label: "絶対に叶えたい！医療や教育、専門的な職業を目指したい💉", value: "S" },
+                        { label: "部活も行事も！色んな体験をして世界を広げたい 🌏", value: "A" },
+                        { label: "まだ夢は探し中。自分の「好き」を見つけたい 🔍", value: "A" },
+                    ]
+                },
+                q2_S: {
+                    text: "どんなことに一番ワクワクする？",
+                    options: [
+                        { label: "難しい問題を解いたり、深い知識を得ること 📖", value: "Academic_Future" },
+                        { label: "社会の課題について考えたり、解決策を探すこと 💡", value: "Academic_Future" },
+                        { label: "困っている人を助けたり、支えてあげること 🤝", value: "Nursing_Child" },
+                        { label: "子供と遊んだり、成長を見守ること 👶", value: "Nursing_Child" },
+                    ]
+                },
+                q3_S_AF: {
+                    text: "将来、どんな大人になりたい？",
+                    options: [
+                        { label: "専門知識を持った研究者やスペシャリスト🎓", value: "academics" },
+                        { label: "難関大学に入って、可能性を広げたい✨", value: "academics" },
+                        { label: "自分の力を社会の役に立てたい💪", value: "future_exploration" },
+                        { label: "社会の問題を解決する探究者🔬", value: "future_exploration" },
+                    ]
+                },
+                q3_S_NC: {
+                    text: "どの体験に行ってみたい？",
+                    options: [
+                        { label: "病院！ナース服を着て現場を見てみたい🏥", value: "nursing" },
+                        { label: "ピアノを弾いて、みんなと歌いたい🎹", value: "child_education" },
+                        { label: "医療ドラマみたいに、命を救う現場に憧れる🩺", value: "nursing" },      
+                        { label: "幼稚園！子供たちと一緒に遊びたい👩‍👦", value: "child_education" },                 
+                    ]
+                },
+                q2_A: {
+                    text: "放課後、何をしている時が輝いてる？",
+                    options: [
+                        { label: "部活で汗を流している時！運動大好き 🏃‍♀️", value: "Active" },
+                        { label: "PCを使ったり、何か技術を身につけている時 💻", value: "Skill" },
+                        { label: "誰かと話したり、お世話をしている時 🗣️", value: "Human" },
+                        { label: "ニュースを見たり、新しい発見をした時 📡", value: "Social" },
+                    ]
+                },
+                q3_A_ActiveSkill: {
+                    text: "高校卒業後のイメージは？",
+                    options: [
+                        { label: "スポーツ推薦で大学へ！競技を極めたい⛷️", value: "sports" },
+                        { label: "専門学校でプロの技術を早く身につけたい🎨", value: "career_build" },
+                        { label: "部活の仲間と全国を目指して頑張りたい🏐", value: "sports" },
+                        { label: "資格を武器に、社会で即戦力になりたい💻", value: "career_build" },
+                    ]
+                },
+                q3_A_HumanSocial: {
+                    text: "どんな場所で活躍してみたい？",
+                    options: [
+                        { label: "病院や医療機関で、人を支えたい🩺", value: "nursing" },
+                        { label: "幼稚園や保育園で、子供を育てたい👩‍👦", value: "child_education" },
+                        { label: "企業で働いてプロジェクトを動かしたい👩‍💻", value: "future_exploration" },
+                        { label: "まだ分からないから、色んな世界を見て決めたい👀", value: "future_exploration" },
+                    ]
+                },
+                q4: {
+                    text: "文化祭の準備、あなたの役割は？",
+                    options: [
+                        { label: "みんなを引っ張るリーダータイプ 😎", value: "leader" },
+                        { label: "困った人を助けるサポータータイプ 😊", value: "supporter" },
+                        { label: "場を盛り上げるムードメーカー 🥳", value: "mood" },
+                        { label: "コツコツ作業する職人タイプ 🤓", value: "craftsman" },
+                    ]
+                },
+                q5: {
+                    text: "学校生活で一番大切にしたいのは？",
+                    options: [
+                        { label: "「成長」自分を高めること📈", value: "growth" },
+                        { label: "「友情」仲間との思い出🤝", value: "friendship" },
+                        { label: "「安心」自分らしくいられる場所♥️", value: "peace" },
+                        { label: "「挑戦」新しいことへのチャレンジ🎉", value: "challenge" },
+                    ]
+                },
+                q6: {
+                    text: "入学前の今の気持ちを天気で例えると？",
+                    options: [
+                        { label: "快晴！楽しみで待ちきれない！ ☀️", value: "low" },
+                        { label: "晴れ時々曇り。ドキドキするけど楽しみ 🌤️", value: "low" },
+                        { label: "曇り...。勉強についていけるか少し不安 ☁️", value: "high" },
+                        { label: "雨のち晴れ希望。悩みを聞いてほしいな ☂️", value: "high" },
+                    ]
+                }
+            };
+
+            const handleAnswer = (value) => {
+                const newHistory = [...history, value];
+                setHistory(newHistory);
+
+                if (step === 'q1') {
+                    if (value === 'S') setStep('q2_S');
+                    else setStep('q2_A');
+                }
+                else if (step === 'q2_S') {
+                    if (value === 'Academic_Future') setStep('q3_S_AF');
+                    else setStep('q3_S_NC');
+                }
+                else if (step === 'q3_S_AF' || step === 'q3_S_NC') {
+                    setProgramResult(value);
+                    setStep('q4');
+                }
+                else if (step === 'q2_A') {
+                    if (value === 'Active' || value === 'Skill') setStep('q3_A_ActiveSkill');
+                    else setStep('q3_A_HumanSocial');
+                }
+                else if (step === 'q3_A_ActiveSkill' || step === 'q3_A_HumanSocial') {
+                    setProgramResult(value);
+                    setStep('q4');
+                }
+                else if (step === 'q4') setStep('q5');
+                else if (step === 'q5') setStep('q6');
+                else if (step === 'q6') {
+                    setAnxietyLevel(value);
+                    setStep('result');
+                }
+            };
+
+            const resetDiagnosis = () => {
+                setStep('start');
+                setHistory([]);
+                setProgramResult(null);
+                setAnxietyLevel('low');
+                setShowShareModal(false);
+                setGeneratedImage(null);
+                setCopySuccess(false);
+            };
+
+            const wrapText = (ctx, text, x, y, maxWidth, lineHeight) => {
+                const words = text.split('');
+                let line = '';
+                let startY = y;
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n];
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        ctx.fillText(line, x, y);
+                        line = words[n];
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, y);
+                return y + lineHeight;
+            };
+
+            const roundRect = (ctx, x, y, w, h, r) => {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + w, y, x + w, y + h, r);
+                ctx.arcTo(x + w, y + h, x, y + h, r);
+                ctx.arcTo(x, y + h, x, y, r);
+                ctx.arcTo(x, y, x + w, y, r);
+                ctx.closePath();
+                return ctx;
+            };
+
+            const generateShareImageBlob = (result) => {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const width = 1080;
+                        const height = 1920;
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                        gradient.addColorStop(0, result.bgHex || '#EFF6FF');
+                        gradient.addColorStop(1, '#FFFFFF');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, width, height);
+
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.beginPath();
+                        ctx.arc(100, 100, 200, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(width - 50, height - 100, 300, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+                        ctx.shadowBlur = 40;
+                        ctx.shadowOffsetY = 20;
+
+                        const cardX = 100;
+                        const cardY = 300;
+                        const cardW = width - 200;
+                        const cardH = 1200;
+                        ctx.fillStyle = '#FFFFFF';
+                        roundRect(ctx, cardX, cardY, cardW, cardH, 60).fill();
+
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        ctx.shadowOffsetY = 0;
+
+                        ctx.font = '200px serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(result.emoji || '✨', width / 2, cardY + 200);
+
+                        ctx.fillStyle = '#9CA3AF';
+                        ctx.font = 'bold 40px sans-serif';
+                        ctx.fillText('YOU ARE...', width / 2, cardY + 400);
+
+                        ctx.fillStyle = result.hexColor || '#3B82F6';
+                        ctx.font = 'bold 100px sans-serif';
+                        ctx.fillText(result.title, width / 2, cardY + 520);
+
+                        ctx.fillStyle = '#4B5563';
+                        ctx.font = 'bold 50px sans-serif';
+                        ctx.fillText(result.subtitle, width / 2, cardY + 620);
+
+                        const msgX = cardX + 80;
+                        const msgY = cardY + 700;
+                        const msgW = cardW - 160;
+                        const msgH = 430;
+
+                        ctx.fillStyle = '#F0FDF4';
+                        ctx.strokeStyle = '#BBF7D0';
+                        ctx.lineWidth = 4;
+                        roundRect(ctx, msgX, msgY, msgW, msgH, 40);
+                        ctx.fill();
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#374151';
+                        ctx.font = '40px sans-serif';
+                        ctx.textAlign = 'left';
+                        wrapText(ctx, result.midorisuMsg, msgX + 40, msgY + 80, msgW - 80, 60);
+
+                        ctx.font = 'bold 30px sans-serif';
+                        ctx.fillStyle = '#15803D';
+                        ctx.textAlign = 'right';
+                        ctx.fillText('🐿️ みどりすより', msgX + msgW - 40, msgY + msgH - 40);
+
+                        ctx.textAlign = 'center';
+                        ctx.font = 'bold 40px sans-serif';
+                        ctx.fillStyle = '#9CA3AF';
+                        ctx.fillText('#緑ヶ丘女子 #なりたい自分診断', width / 2, height - 150);
+
+                        canvas.toBlob((blob) => {
+                            if (blob) resolve(blob);
+                            else reject(new Error('Canvas conversion failed'));
+                        }, 'image/png');
+
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            };
+
+            const handleShareClick = async () => {
+                if (!programResult || isGeneratingImage) return;
+
+                setIsGeneratingImage(true);
+                const result = programs[programResult];
+
+                try {
+                    const blob = await generateShareImageBlob(result);
+                    const url = URL.createObjectURL(blob);
+                    setGeneratedImage(url);
+
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            setCopySuccess(true);
+                        } catch (copyError) {
+                            console.warn("Clipboard write failed:", copyError);
+                            setCopySuccess(false);
+                        }
+                    } else {
+                        setCopySuccess(false);
+                    }
+
+                    setShowShareModal(true);
+                } catch (err) {
+                    console.error('Image generation/copy failed', err);
+                    alert('画像の生成に失敗しました。');
+                } finally {
+                    setIsGeneratingImage(false);
+                }
+            };
+
+            const handleOpenInstagram = (e) => {
+                e.preventDefault();
+                // 1. まずアプリのストーリーカメラ起動を試みる
+                window.location.href = "instagram://story-camera";
+                
+                // 2. 0.5秒以内にアプリが開かなかったらWeb版またはアプリトップへフォールバック
+                setTimeout(() => {
+                    window.location.href = "https://www.instagram.com/";
+                }, 500);
+            };
+
+            const getProgress = () => {
+                if (step === 'start') return 0;
+                if (step === 'result') return 100;
+                const stepNum = parseInt(step.replace(/[^0-9]/g, '').substring(0, 1));
+                return (stepNum / 6) * 100;
+            };
+
+            if (step === 'start') {
+                return React.createElement("div", { className: "min-h-screen bg-gray-50 flex items-center justify-center p-4 font-sans" },
+                    React.createElement("div", { className: "w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-white ring-4 ring-green-100/50" },
+                        React.createElement("div", { className: "bg-gradient-to-br from-green-400 to-teal-500 p-8 text-center relative overflow-hidden" },
+                            React.createElement("div", { className: "absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" }),
+                            React.createElement("div", { className: "bg-white/20 backdrop-blur-sm rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4 border-4 border-white/30 shadow-lg animate-bounce" },
+                                React.createElement("img", { src: "topicon01.png", className: "w-32 h-32 object-contain drop-shadow-md", alt: "Top Icon" })
+                            ),
+                            React.createElement("h1", { className: "text-3xl font-black text-white drop-shadow-md mb-2" },
+                                "緑ヶ丘女子", React.createElement("br", null),
+                                React.createElement("span", { className: "text-yellow-300 text-4xl" }, "なりたい自分診断")
+                            ),
+                            React.createElement("div", { className: "inline-block bg-white/20 text-white px-3 py-1 rounded-full text-sm font-bold backdrop-blur-md" },
+                                "2026年 新プログラム対応✨"
+                            )
+                        ),
+                        React.createElement("div", { className: "p-6" },
+                            React.createElement("p", { className: "text-gray-600 text-center leading-relaxed font-medium mb-8 bg-green-50 p-4 rounded-2xl border border-green-100" },
+                                "新しく生まれ変わった緑ヶ丘女子。", React.createElement("br", null),
+                                "あなたにぴったりの", React.createElement("br", null),
+                                React.createElement("span", { className: "font-bold text-green-600" }, "「6つのプログラム」"), "はどれ？", React.createElement("br", null),
+                                "みどりすと一緒に探してみよう！🐿️"
+                            ),
+                            React.createElement("button", {
+                                onClick: () => setStep('q1'),
+                                className: "w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-2xl text-xl shadow-lg transform transition active:scale-95 flex items-center justify-center group"
+                            },
+                                "診断スタート！",
+                                React.createElement(ArrowRight, { className: "ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" })
+                            )
+                        )
+                    )
+                );
+            }
+
+            if (step.startsWith('q')) {
+                const currentQ = questions[step];
+
+                return React.createElement("div", { className: "min-h-screen bg-blue-50 flex items-center justify-center p-4 font-sans" },
+                    React.createElement("div", { className: "w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden relative border-4 border-white" },
+                        React.createElement("div", { className: "bg-gray-100 h-3 w-full" },
+                            React.createElement("div", {
+                                className: "bg-gradient-to-r from-pink-400 to-yellow-400 h-3 transition-all duration-500 ease-out",
+                                style: { width: `${getProgress()}%` }
+                            })
+                        ),
+                        React.createElement("div", { className: "p-6 pb-8" },
+                            React.createElement("div", { className: "flex justify-between items-center mb-6" },
+                            React.createElement("span", { className: "bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold" },
+                                `Q${step.replace(/[^0-9]/g, '').substring(0, 1)} / 6`
+                            ),
+                            // 画像に変更（サイズは w-8 h-8 で調整済み）
+                            React.createElement("img", { 
+                               src: "subicon01.png", 
+                               className: "w-8 h-8 object-contain animate-pulse", 
+                               alt: "Sub Icon" 
+                            })
+                        ),
+                            React.createElement("h2", { className: "text-xl md:text-2xl font-bold text-gray-800 mb-8 text-center leading-snug" },
+                                currentQ.text
+                            ),
+                            React.createElement("div", { className: "space-y-3" },
+                                currentQ.options.map((opt, idx) => (
+                                    React.createElement("button", {
+                                        key: idx,
+                                        onClick: () => handleAnswer(opt.value),
+                                        className: "w-full bg-white border-2 border-gray-100 hover:border-pink-400 hover:bg-pink-50 text-gray-700 font-bold py-4 px-4 rounded-xl text-left transition-all active:scale-98 flex items-center shadow-sm group"
+                                    },
+                                        React.createElement("span", { className: "w-8 h-8 rounded-full bg-gray-100 group-hover:bg-pink-200 text-gray-500 group-hover:text-pink-600 flex items-center justify-center mr-3 font-black text-sm flex-shrink-0 transition-colors" },
+                                            ['A', 'B', 'C', 'D'][idx]
+                                        ),
+                                        React.createElement("span", { className: "text-sm md:text-base leading-tight" },
+                                            opt.label
+                                        )
+                                    )
+                                ))
+                            )
+                        )
+                    )
+                );
+            }
+
+            if (step === 'result' && programResult) {
+                const result = programs[programResult];
+
+                return React.createElement("div", { className: "min-h-screen bg-gray-50 flex items-center justify-center p-4 font-sans py-8 relative" },
+                    React.createElement("div", { className: "w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-white relative animate-fade-in-up" },
+                        React.createElement("div", { className: "absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 via-yellow-400 to-blue-400" }),
+                        React.createElement("div", { className: `${result.headerBg} p-8 text-center relative overflow-hidden` },
+                            React.createElement("div", { className: "absolute top-[-20%] left-[-20%] w-48 h-48 bg-white opacity-30 rounded-full blur-2xl" }),
+                            React.createElement("div", { className: "bg-white w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-white/60" },
+                                result.icon
+                            ),
+                            React.createElement("p", { className: "font-bold text-gray-500 text-xs tracking-widest uppercase mb-1 bg-white/50 inline-block px-3 py-1 rounded-full backdrop-blur-sm" },
+                                "YOU ARE..."
+                            ),
+                            React.createElement("h1", { className: `text-3xl md:text-4xl font-black mb-2 bg-gradient-to-r ${result.textGradient} bg-clip-text text-transparent drop-shadow-sm` },
+                                result.title
+                            ),
+                            React.createElement("p", { className: `font-bold text-sm ${result.accentColor} bg-white/60 inline-block px-4 py-1 rounded-lg shadow-sm` },
+                                result.subtitle
+                            )
+                        ),
+                        React.createElement("div", { className: "p-5 space-y-5 bg-gradient-to-b from-white to-gray-50" },
+                            React.createElement("div", { className: "flex gap-3" },
+                                React.createElement("div", { className: "flex-shrink-0 flex flex-col items-center" },
+                                   React.createElement("div", { className: "w-16 h-16 bg-green-100 rounded-full flex items-center justify-center border-2 border-white shadow-md mb-1 relative overflow-hidden" },
+                                     // imgタグに変更し、classNameでサイズ調整（object-coverなど）を追加
+                                      React.createElement("img", { src: "resulticon01.png", className: "w-full h-full object-cover", alt: "みどりす" })
+                                    ),
+                                    React.createElement("span", { className: "text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full" }, "みどりす先生")
+                                ),
+                               React.createElement("div", { className: "bg-white p-5 rounded-2xl rounded-tl-none border-2 border-green-100 shadow-sm flex-1 flex flex-col gap-2" },
+                                // 1. メッセージ本文
+                                React.createElement("p", { className: "text-sm leading-relaxed text-gray-700 font-medium" },
+                                    result.midorisuMsg
+                                ),
+                                // 2. 署名（右寄せ）
+                                React.createElement("p", { className: "text-xs font-bold text-green-600 text-right mt-1" },
+                                    "🐿️ みどりすより"
+                                )
+                                 ),
+                            ),
+                            React.createElement("div", { className: `bg-white border-l-4 ${result.color.replace('bg-', 'border-').replace('border-', 'border-l-')} rounded-r-xl p-4 shadow-sm` },
+                                React.createElement("h3", { className: "flex items-center text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" },
+                                    React.createElement("span", { className: "w-1.5 h-1.5 bg-gray-400 rounded-full mr-2" }),
+                                    "実際は...?"
+                                ),
+                                React.createElement("p", { className: "text-gray-600 text-sm leading-relaxed" },
+                                    result.fact
+                                )
+                            ),
+                            React.createElement("div", { className: `rounded-xl p-4 border ${anxietyLevel === 'high' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}` },
+                                React.createElement("div", { className: "flex items-center gap-2 mb-2" },
+                                    React.createElement(Heart, { className: `w-4 h-4 ${anxietyLevel === 'high' ? 'text-amber-500' : 'text-blue-500'}`, fill: "currentColor" }),
+                                    React.createElement("h3", { className: `font-bold text-xs ${anxietyLevel === 'high' ? 'text-amber-700' : 'text-blue-700'}` },
+                                        "エンジェルルーム・保健室より"
+                                    )
+                                ),
+                                React.createElement("p", { className: "text-xs text-gray-600 leading-relaxed" },
+                                    anxietyLevel === 'high'
+                                        ? "「もし、新しい環境が少し不安だったり、自分のペースでゆっくり進みたくなったりしても大丈夫🍀 緑ヶ丘女子には、心と体を休ませながら自分の課題に取り組める『エンジェルルーム』があるんだ。どんな時も、キミがキミらしくいられる場所を大切に守っているよ。」"
+                                        : "緑ヶ丘女子には、心と体を休ませる『エンジェルルーム』も新設✨ キミがどんな時でも安心して挑戦できる環境が整っているから、思いっきり飛び込んでおいで！"
+                                )
+                            ),
+                            React.createElement("div", { className: "space-y-3 pt-2" },
+                                React.createElement("a", {
+                                    href: "https://midorigaoka.ed.jp/",
+                                    target: "_blank",
+                                    rel: "noopener noreferrer",
+                                    className: "w-full bg-gradient-to-r from-gray-800 to-gray-700 hover:from-black hover:to-gray-800 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2"
+                                },
+                                    "公式サイトで詳しく見る",
+                                    React.createElement(ArrowRight, { size: 18 })
+                                ),
+                                React.createElement("button", {
+                                    onClick: handleShareClick,
+                                    disabled: isGeneratingImage,
+                                    className: `w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2 ${isGeneratingImage ? 'opacity-70 cursor-wait' : ''}`
+                                },
+                                    isGeneratingImage ? React.createElement(RefreshCw, { className: "animate-spin", size: 18 }) : React.createElement(Instagram, { size: 18 }),
+                                    isGeneratingImage ? '画像生成中...' : 'Instagramでシェア'
+                                ),
+                                React.createElement("button", {
+                                    onClick: resetDiagnosis,
+                                    className: "w-full text-gray-400 hover:text-green-600 py-3 text-sm flex items-center justify-center gap-2 font-bold transition-colors"
+                                },
+                                    React.createElement(RefreshCw, { size: 14 }),
+                                    "もう一度診断する"
+                                )
+                            )
+                        )
+                    ),
+                    showShareModal && React.createElement("div", { className: "fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in" },
+                        React.createElement("div", { className: "bg-white rounded-3xl p-6 w-full max-w-sm relative shadow-2xl transform transition-all scale-100 flex flex-col max-h-[90vh] overflow-y-auto" },
+                            React.createElement("button", {
+                                onClick: () => setShowShareModal(false),
+                                className: "absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1 z-10"
+                            },
+                                React.createElement(X, { size: 20 })
+                            ),
+                            React.createElement("div", { className: "text-center" },
+                                React.createElement("div", { className: `w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${copySuccess ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}` },
+                                    copySuccess ? React.createElement(ImageIcon, { size: 32 }) : React.createElement(Download, { size: 32 })
+                                ),
+                                React.createElement("h3", { className: "text-xl font-bold text-gray-800 mb-2" },
+                                    copySuccess ? "コピー完了！📋" : "画像を保存してね！📸"
+                                ),
+                                React.createElement("p", { className: "text-sm text-gray-600 mb-4 leading-relaxed" },
+                                    copySuccess ? (
+                                        React.createElement(React.Fragment, null,
+                                            "診断結果の画像をコピーしたよ。", React.createElement("br", null),
+                                            "Instagramを開いて、ストーリーズで", React.createElement("br", null),
+                                            React.createElement("span", { className: "font-bold text-pink-500" }, "「ペースト」"), "して貼り付けてね！"
+                                        )
+                                    ) : (
+                                        React.createElement(React.Fragment, null,
+                                            "自動コピーができなかったみたい💦", React.createElement("br", null),
+                                            "下の画像を", React.createElement("span", { className: "font-bold text-orange-500" }, "長押しして保存（またはコピー）"), React.createElement("br", null),
+                                            "してからInstagramに貼ってね！"
+                                        )
+                                    )
+                                ),
+                                generatedImage && React.createElement("div", { className: "mb-6 border-2 border-gray-100 rounded-xl overflow-hidden shadow-sm" },
+                                    React.createElement("img", { src: generatedImage, alt: "診断結果", className: "w-full h-auto" })
+                                ),
+                                React.createElement("div", { className: "bg-gray-50 rounded-xl p-4 mb-6 text-xs text-left border border-gray-100" },
+                                    React.createElement("p", { className: "font-bold text-gray-500 mb-2" }, "手順ヒント:"),
+                                    React.createElement("ol", { className: "list-decimal list-inside space-y-1 text-gray-600" },
+                                        React.createElement("li", null, copySuccess ? "下のボタンでInstagramを開く" : "上の画像を長押しして保存"),
+                                        React.createElement("li", null, "ストーリーズ作成画面へ"),
+                                        React.createElement("li", null, "文字入力モード(Aa)を選択"),
+                                        React.createElement("li", null, "画面長押しして「ペースト」！")
+                                    )
+                                ),
+                                React.createElement("a", {
+                                    href: "#", // ダミーリンク
+                                    onClick: handleOpenInstagram, // スマートな起動ハンドラを使用
+                                    className: "block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 mb-3 cursor-pointer"
+                                },
+                                    React.createElement(Instagram, { size: 20 }), " Instagramを開く"
+                                ),
+                                React.createElement("button", {
+                                    onClick: () => setShowShareModal(false),
+                                    className: "text-gray-400 text-sm font-bold hover:text-gray-600"
+                                },
+                                    "閉じる"
+                                )
+                            )
+                        )
+                    )
+                );
+            };
+
+            return null;
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(React.createElement(MidorigaokaDiagnosis));
+    </script>
+</body>
+</html>
